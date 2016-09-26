@@ -145,7 +145,7 @@ task usercontrol(){
 		if(gyroCurrent == abs(gyroCurrent)){
 			botRotation = gyroCurrent - 450;
 		}else{
-			botRotation = (360 - abs(gyroCurrent)) - 450;
+			botRotation = (3600 - abs(gyroCurrent)) - 450;
 		}
 		
 		//Display bot rotation on LCD
