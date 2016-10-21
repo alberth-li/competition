@@ -136,6 +136,7 @@ task autonomous(){
 }
 
 task usercontrol(){
+	bool driveTrainOrient = false;
 	int X2 = 0, Y1 = 0, X1 = 0, threshold = 15;
 	displayLCDCenteredString(0,"Current Heading");
 	while(true){
@@ -158,22 +159,31 @@ task usercontrol(){
 			X2 = 0;
 		}
 
-		if(vexRT[Btn6U]){
+		if(vexRT[Btn6DXmtr2]){
 			motor[lManipulator] = 127;
 			motor[rManipulator] = 127;
-		} else if(vexRT[Btn6D]){
+		} else if(vexRT[Btn6UXmtr2]){
 			motor[lManipulator] = -127;
 			motor[rManipulator] = -127;
 		} else {
 			motor[lManipulator] = 0;
 			motor[rManipulator] = 0;
 		}
-
+		
+		if (vexRT[Btn8R]){
+			driveTrainOrient = !driveTrainOrient;
+		}
 		//Remote Control Commands
-		motor[rFDrive] = (Y1 - X2 - X1);
-		motor[rBDrive] = (Y1 - X2 + X1);
-		motor[lFDrive] = (Y1 + X2 + X1);
-		motor[lBDrive] = (Y1 + X2 - X1);
-
+		if (driveTrainOrient){
+			motor[rFDrive] = (Y1 - X2 - X1);
+			motor[rBDrive] = (Y1 - X2 + X1);
+			motor[lFDrive] = (Y1 + X2 + X1);
+			motor[lBDrive] = (Y1 + X2 - X1);
+		} else {
+			motor[rBDrive] = (Y1 - X2 - X1);
+			motor[rFDrive] = (Y1 - X2 + X1);
+			motor[lBDrive] = (Y1 + X2 + X1);
+			motor[lFDrive] = (Y1 + X2 - X1);
+		}
 	}
 }
