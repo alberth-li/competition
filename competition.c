@@ -126,7 +126,7 @@ void pre_auton(){
 
   //initialize gyro
 	initGyro();
-	
+
 	//Start LCD Interaction
 	LCDInteraction();
 }
@@ -136,21 +136,9 @@ task autonomous(){
 }
 
 task usercontrol(){
-	int X2 = 0, Y1 = 0, X1 = 0, threshold = 15, gyroCurrent, botRotation;
-	float xPower, yPower;
+	int X2 = 0, Y1 = 0, X1 = 0, threshold = 15;
 	displayLCDCenteredString(0,"Current Heading");
 	while(true){
-		//Evaluate Gyro to find heading
-		gyroCurrent = SensorValue[gyro];
-		if(gyroCurrent == abs(gyroCurrent)){
-			botRotation = gyroCurrent - 450;
-		}else{
-			botRotation = (3600 - abs(gyroCurrent)) - 450;
-		}
-		
-		//Display bot rotation on LCD
-		displayLCDNumber(1,0,gyroCurrent);
-		
 		//Create "deadzone" for Y1/Ch3
 		if(abs(vexRT[Ch3]) > threshold){
 			Y1 = vexRT[Ch3];
@@ -180,15 +168,12 @@ task usercontrol(){
 			motor[lManipulator] = 0;
 			motor[rManipulator] = 0;
 		}
-		
-		xPower = round((Y1 - X2 - X1) * cosDegrees(botRotation/10));
-		yPower = round((Y1 - X2 - X1) * sinDegrees(botRotation/10));
-		
+
 		//Remote Control Commands
-		motor[rFDrive] = xPower;
-		motor[rBDrive] = yPower;
-		motor[lFDrive] = yPower;
-		motor[lBDrive] = xPower;
+		motor[rFDrive] = (Y1 - X2 - X1);
+		motor[rBDrive] = (Y1 - X2 + X1);
+		motor[lFDrive] = (Y1 + X2 + X1);
+		motor[lBDrive] = (Y1 + X2 - X1);
 
 	}
 }
