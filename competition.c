@@ -1,5 +1,6 @@
 #pragma config(I2C_Usage, I2C1, i2cSensors)
 #pragma config(Sensor, in1,    gyro,           sensorGyro)
+#pragma config(Sensor, in2,    secondaryBatt,     sensorAnalog)
 #pragma config(Sensor, I2C_1,  ,               sensorQuadEncoderOnI2CPort,    , AutoAssign )
 #pragma config(Sensor, I2C_2,  ,               sensorQuadEncoderOnI2CPort,    , AutoAssign )
 #pragma config(Motor,  port2,           lFDrive,       tmotorVex393_MC29, openLoop)
@@ -38,19 +39,29 @@ void waitForRelease(){
 void LCDAction(int count){
 	switch(count){
 		case 0:
-			string mainBattery, backupBattery;
+			string primaryBattery;//, secondaryBattery;
 			clearLCDLine(0);
 			clearLCDLine(1);
 			displayLCDString(0, 0, "Primary: ");
-			sprintf(mainBattery, "%1.2f%c", nImmediateBatteryLevel/1000.0,'V');
-			displayNextLCDString(mainBattery);
-			displayLCDString(1, 0, "Backup: ");
-			sprintf(backupBattery, "%1.2f%c", BackupBatteryLevel/1000.0, 'V');
-			displayNextLCDString(backupBattery);
+			sprintf(primaryBattery, "%1.2f%c", nImmediateBatteryLevel/1000.0,'V');
+			displayNextLCDString(primaryBattery);
+			/*displayLCDString(1, 0, "Secondary: ");
+			sprintf(secondaryBattery, "%1.2f%c", SensorValue[secondaryBatt]/70.0, 'V');
+			displayNextLCDString(secondaryBattery);*/
 			waitForPress();
 			waitForRelease();
 			break;
 		case 1:
+			string backupBattery;
+			clearLCDLine(0);
+			clearLCDLine(1);
+			displayLCDString(0, 0, "Backup: ");
+			sprintf(backupBattery, "%1.2f%c", BackupBatteryLevel/1000.0,'V');
+			displayNextLCDString(backupBattery);
+			waitForPress();
+			waitForRelease();
+			break;
+		case 2:
 			clearLCDLine(0);
 			clearLCDLine(1);
 			displayLCDCenteredString(0,"Auton");
@@ -82,7 +93,7 @@ void LCDInteraction(){
 					}
 					break;
 				case 1:
-					displayLCDCenteredString(0,"Choose Auton");
+					displayLCDCenteredString(0,"Backup Battery");
 					displayLCDCenteredString(1, "<    Enter     >");
 					waitForPress();
 					if(nLCDButtons == centerButton){
@@ -97,6 +108,21 @@ void LCDInteraction(){
 					}
 					break;
 				case 2:
+					displayLCDCenteredString(0,"Choose Auton");
+					displayLCDCenteredString(1, "<    Enter     >");
+					waitForPress();
+					if(nLCDButtons == centerButton){
+						waitForRelease();
+						LCDAction(count);
+					} else if(nLCDButtons == leftButton) {
+						waitForRelease();
+						count--;
+					} else if(nLCDButtons == rightButton) {
+						waitForRelease();
+						count++;
+					}
+					break;
+				case 3:
 					displayLCDCenteredString(0,"Done?");
 					displayLCDCenteredString(1, "<    Enter      ");
 					waitForPress();
@@ -167,18 +193,22 @@ task usercontrol(){
 		
 		if (vexRT[Btn8R]){
 			driveTrainOrient = !driveTrainOrient;
+			wait1Msec(250);
 		}
+		
 		//Remote Control Commands
 		if (driveTrainOrient){
+			displayLCDCenteredString(0,"/\\");
 			motor[rFDrive] = (Y1 - X2 - X1);
 			motor[rBDrive] = (Y1 - X2 + X1);
 			motor[lFDrive] = (Y1 + X2 + X1);
 			motor[lBDrive] = (Y1 + X2 - X1);
 		} else {
-			motor[rBDrive] = (Y1 - X2 - X1);
-			motor[rFDrive] = (Y1 - X2 + X1);
-			motor[lBDrive] = (Y1 + X2 + X1);
-			motor[lFDrive] = (Y1 + X2 - X1);
+			displayLCDCenteredString(0,"\\/");
+			motor[rFDrive] = (Y1 + X2 - X1)*-1;
+			motor[rBDrive] = (Y1 + X2 + X1)*-1;
+			motor[lFDrive] = (Y1 - X2 + X1)*-1;
+			motor[lBDrive] = (Y1 - X2 - X1)*-1;
 		}
 	}
 }
